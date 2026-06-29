@@ -1,12 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase'; // Updated Path
 
-export default function GalleryPage() {
-  const [galleryItems, setGalleryItems] = useState([]);
-  const [albums, setAlbums] = useState({});
-  const [activeAlbum, setActiveAlbum] = useState(null); // null means 'Album View', string means 'Photo View'
+export default function PublicGallery() {
+  const [galleryAlbums, setGalleryAlbums] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchGallery() {
@@ -14,154 +13,90 @@ export default function GalleryPage() {
         .from('gallery')
         .select('*')
         .order('created_at', { ascending: false });
-      if (data) {
-        setGalleryItems(data);
 
-        // Group photos by location to create Albums
-        const groupedAlbums = {};
-        data.forEach((item) => {
-          if (!groupedAlbums[item.location_name]) {
-            groupedAlbums[item.location_name] = {
-              name: item.location_name,
-              cover: item.image_url,
-              photos: [],
-            };
-          }
-          groupedAlbums[item.location_name].photos.push(item);
+      if (data) {
+        const grouped = {};
+        data.forEach(item => {
+          if (!grouped[item.location_name]) grouped[item.location_name] = [];
+          grouped[item.location_name].push(item);
         });
-        setAlbums(groupedAlbums);
+        setGalleryAlbums(grouped);
       }
+      setLoading(false);
     }
     fetchGallery();
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-gray-800 font-serif">
-      {/* Inline CSS for smooth fade-in animations */}
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-      `,
-        }}
-      />
+    <div className="min-h-screen bg-[#faf8f5] text-gray-800 font-sans">
+      
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .animate-fade { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
+        .gallery-bg { background: linear-gradient(to bottom, rgba(10,10,10,0.8), rgba(10,10,10,0.9)), url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1920&q=80') center/cover; }
+      `}} />
 
-      <header className="bg-white py-5 px-10 border-b border-gray-100 sticky top-0 z-50 flex justify-between items-center shadow-sm">
-        <Link href="/" className="font-bold tracking-wider text-xl">
-          THE WANDERING SCHOLAR
-        </Link>
-        <Link
-          href="/"
-          className="text-[10px] font-sans font-bold uppercase tracking-widest hover:text-[#c66b1a] transition"
-        >
-          ← Back to Home
+      {/* HEADER */}
+      <header className="bg-white py-5 px-6 lg:px-10 border-b border-gray-100 sticky top-0 z-50 flex justify-between items-center shadow-sm">
+        <Link href="/" className="font-black tracking-wider text-xl text-[#b45f1b]">STUDIO.</Link>
+        <Link href="/" className="text-[10px] font-bold uppercase tracking-widest hover:text-[#b45f1b] transition flex items-center gap-2">
+          <span>←</span> Back to Home
         </Link>
       </header>
 
-      <section className="py-24 text-center bg-[#111] text-white border-b relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80')] opacity-20 object-cover bg-center"></div>
-        <div className="relative z-10">
-          <h1 className="text-5xl font-bold font-sans tracking-widest uppercase">
-            PHOTO GALLERY
-          </h1>
-          <p className="mt-4 text-gray-400 font-sans text-sm tracking-widest uppercase">
-            {activeAlbum
-              ? `Memories from ${activeAlbum}`
-              : 'Travel diaries and captured moments'}
-          </p>
+      {/* HERO BANNER */}
+      <section className="py-24 text-center gallery-bg text-white relative overflow-hidden flex flex-col items-center justify-center">
+        <div className="relative z-10 animate-fade" style={{ animationDelay: '0.1s' }}>
+          <h1 className="text-4xl md:text-6xl font-black tracking-widest uppercase mb-6">Photo Gallery</h1>
+          <div className="w-20 h-1 bg-[#b45f1b] mx-auto mb-6 rounded-full"></div>
+          <p className="text-gray-300 text-sm md:text-base tracking-widest uppercase font-medium">Moments frozen in time</p>
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto py-16 px-8 min-h-[500px]">
-        {/* VIEW 1: ALBUMS LIST */}
-        {!activeAlbum && (
-          <div className="animate-fade-in">
-            {Object.keys(albums).length === 0 ? (
-              <div className="text-center text-gray-500 py-20 font-sans">
-                No albums created yet.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-                {Object.values(albums).map((album, index) => (
-                  <div
-                    key={index}
-                    onClick={() => setActiveAlbum(album.name)}
-                    className="group cursor-pointer bg-white p-4 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-lg flex flex-col"
-                  >
-                    <div className="aspect-[4/3] overflow-hidden rounded-md relative bg-gray-200">
-                      <img
-                        src={album.cover}
-                        alt={album.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
-                      />
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition duration-500"></div>
-                      <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 text-[10px] font-sans font-bold rounded">
-                        {album.photos.length} Photos
-                      </div>
-                    </div>
-                    <div className="pt-5 pb-2 text-center">
-                      <h3 className="text-lg font-bold uppercase tracking-widest text-[#b45f1b] group-hover:text-black transition">
-                        {album.name}
-                      </h3>
-                      <p className="text-[10px] text-gray-500 font-sans mt-2 uppercase tracking-wider">
-                        Click to open album
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+      {/* GALLERY CONTENT */}
+      <section className="max-w-7xl mx-auto py-20 px-6 min-h-[500px]">
+        {loading ? (
+          <div className="text-center text-gray-500 py-20 font-bold tracking-widest uppercase animate-pulse">Loading Memories...</div>
+        ) : Object.keys(galleryAlbums).length === 0 ? (
+          <div className="text-center py-20 flex flex-col items-center">
+            <span className="text-5xl mb-6">📷</span>
+            <p className="text-gray-500 tracking-widest uppercase font-bold text-sm">No albums uploaded yet.</p>
           </div>
-        )}
-
-        {/* VIEW 2: PHOTOS INSIDE AN ALBUM */}
-        {activeAlbum && (
-          <div className="animate-fade-in">
-            <div className="mb-10 flex justify-center">
-              <button
-                onClick={() => setActiveAlbum(null)}
-                className="bg-black text-white px-8 py-3 text-[10px] font-bold font-sans tracking-widest uppercase hover:bg-[#b45f1b] transition shadow-lg rounded"
-              >
-                ← Back to All Albums
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {albums[activeAlbum].photos.map((photo, index) => (
-                <div
-                  key={photo.id}
-                  className="bg-white p-3 border border-gray-200 shadow-sm rounded-lg hover:shadow-lg transition duration-300"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="aspect-square overflow-hidden rounded bg-gray-100 mb-3 relative group">
-                    <img
-                      src={photo.image_url}
-                      alt="Gallery item"
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                    />
-                  </div>
-                  {photo.description ? (
-                    <p className="text-xs text-gray-600 font-sans text-center px-2 leading-relaxed">
-                      {photo.description}
-                    </p>
-                  ) : (
-                    <p className="text-[10px] text-gray-400 font-sans text-center italic">
-                      No description
-                    </p>
-                  )}
+        ) : (
+          <div className="space-y-24">
+            {Object.keys(galleryAlbums).map((location, albumIndex) => (
+              <div key={location} className="animate-fade" style={{ animationDelay: `${albumIndex * 0.2 + 0.2}s` }}>
+                <div className="flex items-center gap-4 mb-8">
+                  <h2 className="text-3xl font-black text-gray-900 uppercase tracking-widest">{location}</h2>
+                  <div className="h-[2px] flex-1 bg-gray-200"></div>
+                  <span className="text-xs font-bold text-[#b45f1b] uppercase tracking-widest bg-[#b45f1b]/10 px-4 py-1 rounded-full">
+                    {galleryAlbums[location].length} Photos
+                  </span>
                 </div>
-              ))}
-            </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                  {galleryAlbums[location].map((photo) => (
+                    <div key={photo.id} className="group relative overflow-hidden rounded-xl bg-gray-100 aspect-square cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300">
+                      <img src={photo.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out" />
+                      
+                      {photo.description && (
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 md:p-6">
+                          <p className="text-white text-xs md:text-sm font-medium leading-relaxed translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                            {photo.description}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </section>
 
-      <footer className="bg-[#111] text-gray-500 py-16 text-center font-sans">
-        <p className="text-[10px] tracking-widest">
-          © {new Date().getFullYear()} THE WANDERING SCHOLAR. ALL RIGHTS
-          RESERVED.
-        </p>
+      <footer className="bg-[#111] text-gray-500 py-12 text-center text-[10px] tracking-widest font-bold uppercase">
+        <p>© {new Date().getFullYear()} THE WANDERING SCHOLAR.</p>
       </footer>
     </div>
   );

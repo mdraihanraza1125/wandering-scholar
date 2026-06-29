@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase'; // Updated Path
 import { useParams } from 'next/navigation';
 
 export default function CategoryPage() {
