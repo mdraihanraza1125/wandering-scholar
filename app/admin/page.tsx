@@ -13,6 +13,9 @@ export default function AdminDashboard() {
   const [galleryAlbums, setGalleryAlbums] = useState({});
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
+  
+  // NEW: Sidebar state for mobile
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Write Post States
   const initialFormState = {
@@ -268,17 +271,50 @@ export default function AdminDashboard() {
     );
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] flex font-sans text-sm">
-      <aside className="w-64 bg-[#0a0a0a] text-white p-8 flex flex-col justify-between shadow-2xl">
+    <div className="min-h-screen bg-[#faf8f5] flex flex-col lg:flex-row font-sans text-sm relative">
+      
+      {/* MOBILE HEADER (Visible only on small screens) */}
+      <div className="lg:hidden flex items-center justify-between bg-[#0a0a0a] text-white p-4 sticky top-0 z-40 shadow-md">
+        <h2 className="text-xl font-black text-[#b45f1b]">STUDIO.</h2>
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-xs font-bold uppercase tracking-widest bg-[#1a1a1a] px-4 py-2 rounded-lg"
+        >
+          {isSidebarOpen ? 'Close ✕' : '☰ Menu'}
+        </button>
+      </div>
+
+      {/* OVERLAY FOR MOBILE (Dims background when sidebar is open) */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* SIDEBAR (Responsive) */}
+      <aside 
+        className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-[#0a0a0a] text-white p-8 flex flex-col justify-between shadow-2xl z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div>
-          <h2 className="text-3xl font-black mb-1 text-[#b45f1b]">STUDIO.</h2>
-          <nav className="space-y-3 mt-10">
+          <div className="flex justify-between items-center mb-10">
+            <h2 className="text-3xl font-black text-[#b45f1b]">STUDIO.</h2>
+            {/* Close button inside sidebar for mobile */}
+            <button className="lg:hidden text-white hover:text-red-400" onClick={() => setIsSidebarOpen(false)}>
+              ✕
+            </button>
+          </div>
+
+          <nav className="space-y-3">
             <button
               onClick={() => {
                 setActiveTab('write');
                 setIsEditing(false);
                 setFormData(initialFormState);
                 setMessage('');
+                setIsSidebarOpen(false); // Close sidebar on mobile after click
               }}
               className={`w-full text-left px-5 py-3 rounded-xl font-bold ${
                 activeTab === 'write'
@@ -292,6 +328,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 setActiveTab('manage');
                 setMessage('');
+                setIsSidebarOpen(false); // Close sidebar on mobile after click
               }}
               className={`w-full text-left px-5 py-3 rounded-xl font-bold ${
                 activeTab === 'manage'
@@ -305,6 +342,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 setActiveTab('gallery');
                 setMessage('');
+                setIsSidebarOpen(false); // Close sidebar on mobile after click
               }}
               className={`w-full text-left px-5 py-3 rounded-xl font-bold ${
                 activeTab === 'gallery'
@@ -318,6 +356,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 setActiveTab('settings');
                 setMessage('');
+                setIsSidebarOpen(false); // Close sidebar on mobile after click
               }}
               className={`w-full text-left px-5 py-3 rounded-xl font-bold ${
                 activeTab === 'settings'
@@ -334,13 +373,14 @@ export default function AdminDashboard() {
             await supabase.auth.signOut();
             window.location.href = '/login';
           }}
-          className="text-left text-red-400 font-bold text-xs uppercase tracking-widest"
+          className="text-left text-red-400 font-bold text-xs uppercase tracking-widest mt-10"
         >
           Logout ⏏
         </button>
       </aside>
 
-      <main className="flex-1 p-10 lg:p-16 overflow-y-auto">
+      {/* MAIN CONTENT */}
+      <main className="flex-1 p-4 md:p-10 lg:p-16 w-full overflow-x-hidden min-h-[calc(100vh-60px)]">
         {message && (
           <div className="p-4 mb-8 text-xs font-bold bg-black text-white rounded-lg shadow-lg flex justify-between items-center">
             {message}{' '}
@@ -356,12 +396,12 @@ export default function AdminDashboard() {
         {/* --- WRITE POST TAB --- */}
         {activeTab === 'write' && (
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-black mb-8">
+            <h1 className="text-2xl md:text-3xl font-black mb-8">
               {isEditing ? 'Edit Story' : 'Draft New Story'}
             </h1>
             <form
               onSubmit={handlePostSubmit}
-              className="bg-white p-10 shadow-xl border border-gray-100 rounded-2xl space-y-8"
+              className="bg-white p-6 md:p-10 shadow-xl border border-gray-100 rounded-2xl space-y-8"
             >
               <input
                 type="text"
@@ -371,9 +411,9 @@ export default function AdminDashboard() {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 placeholder="Enter title..."
-                className="w-full text-4xl font-bold border-b pb-4 outline-none focus:border-[#b45f1b]"
+                className="w-full text-2xl md:text-4xl font-bold border-b pb-4 outline-none focus:border-[#b45f1b]"
               />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                 <div>
                   <label className="text-[10px] font-bold text-[#b45f1b] uppercase block mb-2">
                     Category
@@ -436,7 +476,7 @@ export default function AdminDashboard() {
                     </span>
                   </div>
                 ) : (
-                  <div className="relative w-full h-64 rounded-xl overflow-hidden shadow-lg group">
+                  <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-lg group">
                     <img
                       src={formData.image_url}
                       className="w-full h-full object-cover"
@@ -468,7 +508,7 @@ export default function AdminDashboard() {
               </div>
               <button
                 type="submit"
-                className="bg-black text-white px-10 py-4 text-xs font-bold uppercase rounded-xl"
+                className="bg-black text-white w-full md:w-auto px-10 py-4 text-xs font-bold uppercase rounded-xl"
               >
                 Publish Post
               </button>
@@ -479,28 +519,28 @@ export default function AdminDashboard() {
         {/* --- MANAGE POSTS TAB --- */}
         {activeTab === 'manage' && (
           <div className="max-w-5xl mx-auto">
-            <h1 className="text-3xl font-black text-gray-900 mb-8">
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-8">
               All Stories
             </h1>
             <div className="grid grid-cols-1 gap-5">
               {stories.map((story) => (
                 <div
                   key={story.id}
-                  className="bg-white p-6 rounded-2xl shadow-sm flex justify-between items-center border border-gray-100"
+                  className="bg-white p-4 md:p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-gray-100"
                 >
-                  <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-4 w-full sm:w-auto">
                     <img
                       src={story.image_url}
-                      className="w-16 h-16 object-cover rounded-xl"
+                      className="w-16 h-16 object-cover rounded-xl shrink-0"
                     />
                     <div>
-                      <h3 className="font-bold text-xl">{story.title}</h3>
-                      <span className="text-xs text-[#b45f1b] font-bold">
+                      <h3 className="font-bold text-lg md:text-xl line-clamp-1">{story.title}</h3>
+                      <span className="text-[10px] md:text-xs text-[#b45f1b] font-bold block mt-1">
                         {story.category}
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 w-full sm:w-auto justify-end">
                     <button
                       onClick={() => {
                         setFormData(story);
@@ -508,7 +548,7 @@ export default function AdminDashboard() {
                         setEditId(story.id);
                         setActiveTab('write');
                       }}
-                      className="bg-gray-100 px-4 py-2 rounded-lg text-xs font-bold"
+                      className="bg-gray-100 px-4 py-2 rounded-lg text-xs font-bold flex-1 sm:flex-none text-center"
                     >
                       Edit
                     </button>
@@ -522,7 +562,7 @@ export default function AdminDashboard() {
                           fetchStories();
                         }
                       }}
-                      className="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-xs font-bold"
+                      className="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-xs font-bold flex-1 sm:flex-none text-center"
                     >
                       Delete
                     </button>
@@ -536,15 +576,15 @@ export default function AdminDashboard() {
         {/* --- ADVANCED GALLERY TAB --- */}
         {activeTab === 'gallery' && (
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-3xl font-black mb-8 text-gray-900">
+            <h1 className="text-2xl md:text-3xl font-black mb-8 text-gray-900">
               Manage Photo Albums
             </h1>
 
             <form
               onSubmit={handleAdvancedGallerySubmit}
-              className="bg-white p-8 shadow-xl border border-gray-100 rounded-2xl mb-12"
+              className="bg-white p-6 md:p-8 shadow-xl border border-gray-100 rounded-2xl mb-12"
             >
-              <h2 className="font-bold text-xl border-b pb-4 mb-6">
+              <h2 className="font-bold text-lg md:text-xl border-b pb-4 mb-6">
                 Create New Album / Add Photos
               </h2>
               <div className="mb-6">
@@ -556,7 +596,7 @@ export default function AdminDashboard() {
                   required
                   value={galleryLocation}
                   onChange={(e) => setGalleryLocation(e.target.value)}
-                  className="w-full text-2xl font-bold border-b-2 border-gray-100 pb-2 outline-none focus:border-[#b45f1b]"
+                  className="w-full text-xl md:text-2xl font-bold border-b-2 border-gray-100 pb-2 outline-none focus:border-[#b45f1b]"
                   placeholder="e.g. Kashmir Diaries"
                 />
               </div>
@@ -579,11 +619,11 @@ export default function AdminDashboard() {
               </div>
 
               {selectedPhotos.length > 0 && (
-                <div className="bg-gray-50 p-6 rounded-xl mb-6 border border-gray-200">
+                <div className="bg-gray-50 p-4 md:p-6 rounded-xl mb-6 border border-gray-200">
                   <h3 className="font-bold text-sm mb-4">
                     Selected Photos ({selectedPhotos.length})
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {selectedPhotos.map((photo, index) => (
                       <div
                         key={index}
@@ -627,28 +667,28 @@ export default function AdminDashboard() {
               </button>
             </form>
 
-            <h2 className="font-bold text-2xl mb-6">Existing Albums</h2>
-            <div className="space-y-10">
+            <h2 className="font-bold text-xl md:text-2xl mb-6">Existing Albums</h2>
+            <div className="space-y-8 md:space-y-10">
               {Object.keys(galleryAlbums).length === 0 && (
                 <p className="text-gray-500">No albums created yet.</p>
               )}
               {Object.keys(galleryAlbums).map((location) => (
                 <div
                   key={location}
-                  className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
+                  className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100"
                 >
-                  <div className="flex justify-between items-center mb-4 border-b pb-2">
-                    <h3 className="font-bold text-xl uppercase tracking-widest text-[#b45f1b]">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b pb-4 gap-4">
+                    <h3 className="font-bold text-lg md:text-xl uppercase tracking-widest text-[#b45f1b]">
                       {location}{' '}
-                      <span className="text-xs text-gray-400 normal-case">
+                      <span className="text-xs text-gray-400 normal-case block md:inline mt-1 md:mt-0">
                         ({galleryAlbums[location].length} photos)
                       </span>
                     </h3>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto">
                       {/* ADD PHOTOS TO EXISTING ALBUM */}
-                      <label className="bg-green-50 text-green-600 px-3 py-1 text-[10px] font-bold rounded cursor-pointer hover:bg-green-100 flex items-center justify-center">
-                        + ADD PHOTOS
+                      <label className="bg-green-50 text-green-600 px-3 py-2 md:py-1 text-[10px] font-bold rounded cursor-pointer hover:bg-green-100 flex items-center justify-center flex-1 md:flex-none">
+                        + ADD
                         <input
                           type="file"
                           multiple
@@ -674,7 +714,7 @@ export default function AdminDashboard() {
                             fetchGallery();
                           }
                         }}
-                        className="bg-blue-50 text-blue-600 px-3 py-1 text-[10px] font-bold rounded"
+                        className="bg-blue-50 text-blue-600 px-3 py-2 md:py-1 text-[10px] font-bold rounded flex-1 md:flex-none"
                       >
                         EDIT NAME
                       </button>
@@ -689,9 +729,9 @@ export default function AdminDashboard() {
                             fetchGallery();
                           }
                         }}
-                        className="bg-red-50 text-red-600 px-3 py-1 text-[10px] font-bold rounded"
+                        className="bg-red-50 text-red-600 px-3 py-2 md:py-1 text-[10px] font-bold rounded flex-1 md:flex-none"
                       >
-                        DELETE ALBUM
+                        DELETE
                       </button>
                     </div>
                   </div>
@@ -700,11 +740,11 @@ export default function AdminDashboard() {
                     {galleryAlbums[location].map((item) => (
                       <div
                         key={item.id}
-                        className="min-w-[150px] w-[150px] relative group shrink-0"
+                        className="min-w-[120px] md:min-w-[150px] w-[120px] md:w-[150px] relative group shrink-0"
                       >
                         <img
                           src={item.image_url}
-                          className="w-full h-32 object-cover rounded shadow-sm"
+                          className="w-full h-24 md:h-32 object-cover rounded shadow-sm"
                         />
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition gap-2 rounded">
                           <button
@@ -752,24 +792,24 @@ export default function AdminDashboard() {
         {/* --- SETTINGS TAB --- */}
         {activeTab === 'settings' && (
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-black text-gray-900 mb-8">
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-8">
               Site Settings
             </h1>
             <form
               onSubmit={handleSettingsSubmit}
-              className="bg-white p-10 shadow-xl rounded-2xl space-y-12"
+              className="bg-white p-6 md:p-10 shadow-xl rounded-2xl space-y-8 md:space-y-12"
             >
               <div>
-                <h2 className="text-lg font-bold mb-4 border-b pb-2">
+                <h2 className="text-base md:text-lg font-bold mb-4 border-b pb-2">
                   1. Homepage Hero Banner
                 </h2>
-                <div className="w-full h-40 border-2 border-dashed border-[#b45f1b]/30 rounded-xl flex items-center justify-center relative cursor-pointer">
+                <div className="w-full h-32 md:h-40 border-2 border-dashed border-[#b45f1b]/30 rounded-xl flex items-center justify-center relative cursor-pointer text-center p-4">
                   <input
                     type="file"
                     onChange={(e) => handleImageUpload(e, 'hero')}
                     className="absolute inset-0 opacity-0 cursor-pointer"
                   />
-                  <span className="text-[#b45f1b] font-bold">
+                  <span className="text-[#b45f1b] font-bold text-sm">
                     {settingsData.hero_image_url
                       ? 'Change Hero Image Banner 📸'
                       : '+ Upload Hero Image Banner'}
@@ -777,11 +817,11 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div>
-                <h2 className="text-lg font-bold mb-4 border-b pb-2">
+                <h2 className="text-base md:text-lg font-bold mb-6 border-b pb-2">
                   2. Author Profile Section
                 </h2>
-                <div className="flex gap-10 items-start">
-                  <div className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-gray-100 bg-gray-50 flex items-center justify-center shrink-0">
+                <div className="flex flex-col md:flex-row gap-8 md:gap-10 items-center md:items-start">
+                  <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden border-4 border-gray-100 bg-gray-50 flex items-center justify-center shrink-0">
                     {settingsData.avatar_url ? (
                       <img
                         src={settingsData.avatar_url}
@@ -819,7 +859,7 @@ export default function AdminDashboard() {
                       }
                       placeholder="Detailed Bio"
                       rows="5"
-                      className="w-full border-2 p-4 rounded-xl resize-none outline-none"
+                      className="w-full border-2 p-4 rounded-xl resize-none outline-none text-sm"
                     />
                     <input
                       type="text"
@@ -838,7 +878,7 @@ export default function AdminDashboard() {
               </div>
               <button
                 type="submit"
-                className="bg-black text-white px-10 py-4 text-xs font-bold uppercase rounded-xl"
+                className="bg-black text-white w-full md:w-auto px-10 py-4 text-xs font-bold uppercase rounded-xl"
               >
                 Save Settings
               </button>
