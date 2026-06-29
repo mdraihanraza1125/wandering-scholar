@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* =========================================
+   CUSTOM BLOG STYLES (BOX & HIGHLIGHT LOGIC)
+   ========================================= */
+
+/* 1. Attractive Quote Box Logic */
+.prose blockquote {
+  background-color: #fff7ed; /* Halka creamy/orange background */
+  border-left: 5px solid #b45f1b; /* Left side ki moti line (Theme color) */
+  padding: 1.5rem; /* Box ke andar ki space */
+  margin: 2rem 0; /* Box ke upar-neeche ki space */
+  border-radius: 0 8px 8px 0; /* Right side se thoda gol (rounded) */
+  font-style: italic;
+  font-size: 1.1rem;
+  color: #333;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Halki si shadow 3D look ke liye */
+}
+
+/* Quote ke andar paragraph ki extra space hatane ke liye */
+.prose blockquote p {
+  margin: 0 !important; 
+}
+
+/* 2. Highlighted Text Logic (Agar koi text background color ke sath aaye) */
+.prose [style*="background-color"] {
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 600;
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1); /* Text ke niche ek halki depth */
+}@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* =========================================
+   CUSTOM BLOG STYLES (BOX & HIGHLIGHT LOGIC)
+   ========================================= */
+
+/* 1. Attractive Quote Box Logic */
+.prose blockquote {
+  background-color: #fff7ed; /* Halka creamy/orange background */
+  border-left: 5px solid #b45f1b; /* Left side ki moti line (Theme color) */
+  padding: 1.5rem; /* Box ke andar ki space */
+  margin: 2rem 0; /* Box ke upar-neeche ki space */
+  border-radius: 0 8px 8px 0; /* Right side se thoda gol (rounded) */
+  font-style: italic;
+  font-size: 1.1rem;
+  color: #333;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Halki si shadow 3D look ke liye */
+}
+
+/* Quote ke andar paragraph ki extra space hatane ke liye */
+.prose blockquote p {
+  margin: 0 !important; 
+}
+
+/* 2. Highlighted Text Logic (Agar koi text background color ke sath aaye) */
+.prose [style*="background-color"] {
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 600;
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1); /* Text ke niche ek halki depth */
+}
